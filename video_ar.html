@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>AR Video Playback</title>
+  <script src="https://cdn.jsdelivr.net/npm/aframe@1.4.2/dist/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+  <style>
+    body { margin: 0; overflow: hidden; }
+  </style>
+</head>
+<body>
+
+  <a-scene
+    mindar-image="imageTargetSrc: targets.mind; autoStart: true; uiScanning: true;"
+    color-space="sRGB"
+    renderer="colorManagement: true; physicallyCorrectLights: true"
+    vr-mode-ui="enabled: false"
+    device-orientation-permission-ui="enabled: false"
+  >
+
+    <!-- Load video file -->
+    <!-- Ganti "video.mp4" dengan nama file video lo -->
+    <a-assets>
+      <video id="introVid" src="video.mp4" preload="auto" loop muted playsinline></video>
+    </a-assets>
+
+    <!-- Cahaya supaya video tidak gelap -->
+    <a-light type="ambient" intensity="1.5"></a-light>
+
+    <a-camera look-controls="enabled: false"></a-camera>
+
+    <!-- Scan marker → tampil video -->
+    <a-entity mindar-image-target="targetIndex: 0">
+      <a-video
+        id="videoEntity"
+        src="#introVid"
+        width="1.2"
+        height="0.7"
+        autoplay="false"
+        loop="true"
+        material="shader: flat"
+        position="0 0 0"
+      ></a-video>
+    </a-entity>
+
+  </a-scene>
+
+  <script>
+    const video = document.querySelector('#introVid');
+    const videoPlane = document.querySelector('#videoEntity');
+    const targetEntity = document.querySelector('a-entity[mindar-image-target]');
+
+    // Klik video → play/pause
+    videoPlane.addEventListener('click', () => {
+      if (video.paused) {
+        video.play();
+      } else {
+        video.pause();
+      }
+    });
+
+    // Scan ketemu → auto play
+    targetEntity.addEventListener('targetFound', () => {
+      video.play();
+    });
+
+    // Scan hilang → pause dan reset ke awal
+    targetEntity.addEventListener('targetLost', () => {
+      video.pause();
+      video.currentTime = 0;
+    });
+  </script>
+
+</body>
+</html>
